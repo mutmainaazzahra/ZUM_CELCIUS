@@ -5,9 +5,9 @@ class AnalyticsService
     {
         $result = [
             'type' => 'OUTDOOR',
-            'message' => 'Cuaca cerah dan bersahabat. Waktu yang tepat untuk aktivitas luar ruangan!',
+            'message' => 'Waktu yang tepat untuk beraktivitas di luar ruangan! Seperti bersepeda atau berjalan-jalan.',
             'icon' => 'bi-bicycle',
-            'color' => 'success', // Hijau
+            'color' => 'success',
             'bg' => '#d1e7dd'
         ];
 
@@ -15,9 +15,9 @@ class AnalyticsService
         if ($weatherId >= 200 && $weatherId < 600) {
             $result = [
                 'type' => 'INDOOR',
-                'message' => 'Hujan lebat atau badai petir. Lebih baik beraktivitas di dalam ruangan.',
+                'message' => 'Lebih baik beraktivitas di dalam ruangan! Seperti membaca buku atau menonton film favorit.',
                 'icon' => 'bi-house-heart-fill',
-                'color' => 'primary', // Biru
+                'color' => 'primary',
                 'bg' => '#cfe2ff'
             ];
         }
@@ -25,9 +25,9 @@ class AnalyticsService
         else if (($weatherId >= 600 && $weatherId < 700) || $temp < 15) {
             $result = [
                 'type' => 'INDOOR',
-                'message' => 'Suhu dingin. Jaga kehangatan, aktivitas indoor lebih disarankan.',
+                'message' => 'Suhu dingin. Jaga kehangatan, aktivitas indoor lebih disarankan sambil menikmati minuman hangat.',
                 'icon' => 'bi-cup-hot-fill',
-                'color' => 'info', // Biru Muda
+                'color' => 'info',
                 'bg' => '#cff4fc'
             ];
         }
@@ -37,7 +37,7 @@ class AnalyticsService
                 'type' => 'HATI-HATI',
                 'message' => 'Ada kabut/polusi. Wajib pakai masker jika keluar dan hindari perjalanan jauh.',
                 'icon' => 'bi-exclamation-triangle-fill',
-                'color' => 'warning', // Kuning
+                'color' => 'warning',
                 'bg' => '#fff3cd'
             ];
         }
@@ -45,9 +45,9 @@ class AnalyticsService
         else if ($temp > 33) {
             $result = [
                 'type' => 'INDOOR / TEDUH',
-                'message' => 'Suhu di atas 33°C. Hindari paparan sinar matahari langsung dan jaga hidrasi tubuh.',
+                'message' => 'Suhu di atas 33°C. Hindari paparan sinar matahari langsung dan jaga hidrasi tubuh. Jangan lupa minum air putih yang cukup.',
                 'icon' => 'bi-thermometer-sun',
-                'color' => 'danger', // Merah
+                'color' => 'danger',
                 'bg' => '#f8d7da'
             ];
         }
@@ -55,7 +55,7 @@ class AnalyticsService
         return $result;
     }
 
-   
+
     public static function prepareChartData($forecastList)
     {
         $labels = [];
