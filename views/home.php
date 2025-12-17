@@ -422,7 +422,7 @@ if (isset($currentWeather['coord'])) {
         <?php endif; ?>
     }
 
-   
+
     function formatPlaceName(feature) {
         if (!feature) return "";
         const mainName = feature.text || "";
@@ -441,7 +441,7 @@ if (isset($currentWeather['coord'])) {
 
         if (uniqueParts.length > 0 && mainName) {
             if (uniqueParts[0].toLowerCase() !== mainName.toLowerCase()) {
-                
+
                 const index = uniqueParts.findIndex(p => p.toLowerCase() === mainName.toLowerCase());
                 if (index === -1) {
                     uniqueParts.unshift(mainName);
@@ -584,7 +584,7 @@ if (isset($currentWeather['coord'])) {
         const ctx = document.getElementById('weatherChart');
         if (ctx) {
             const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(255, 216, 3, 0.5)'); 
+            gradient.addColorStop(0, 'rgba(255, 216, 3, 0.5)');
             gradient.addColorStop(1, 'rgba(255, 216, 3, 0)');
             new Chart(ctx, {
                 type: 'line',
@@ -593,12 +593,12 @@ if (isset($currentWeather['coord'])) {
                     datasets: [{
                         label: 'Suhu (°C)',
                         data: <?php echo json_encode($chartData['data']); ?>,
-                        borderColor: '#272343', // Headline Color
+                        borderColor: '#272343',
                         backgroundColor: gradient,
                         borderWidth: 3,
                         tension: 0.4,
                         fill: true,
-                        pointBackgroundColor: '#ffd803', 
+                        pointBackgroundColor: '#ffd803',
                         pointBorderColor: '#272343',
                         pointRadius: 6
                     }]
@@ -665,7 +665,7 @@ if (isset($currentWeather['coord'])) {
                 if (manualState) manualState.style.display = 'block';
             }, {
                 enableHighAccuracy: true,
-                timeout: 10000,
+                timeout: 20000,
                 maximumAge: 0
             });
         } else if (loadingState) {

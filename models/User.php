@@ -2,6 +2,7 @@
 class User
 {
     private $db;
+
     public function __construct()
     {
         $this->db = Database::getInstance()->getConnection();
@@ -14,6 +15,7 @@ class User
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password_hash'])) {
+            unset($user['password_hash']);
             return $user;
         }
         return false;
@@ -22,16 +24,16 @@ class User
     public function register($username, $email, $password)
     {
         $hash = password_hash($password, PASSWORD_DEFAULT);
+        $role = 'guest user';
+
         try {
-            // Default role: guest user
-            $stmt = $this->db->prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, 'guest user')");
-            return $stmt->execute([$username, $email, $hash]);
+            $stmt = $this->db->prepare("INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)");
+            return $stmt->execute([$username, $email, $hash, $role]);
         } catch (PDOException $e) {
             return false;
         }
     }
 
-    // Fungsi Admin Create User
     public function create($username, $email, $password, $role)
     {
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -43,16 +45,36 @@ class User
         }
     }
 
-    public function updateProfile($id, $username, $email, $photo = null)
+    public function getById($id)
     {
+        $stmt = $this->db->prepare("SELECT id, username, email, role, lat, lon, profile_photo, last_location_name FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
+
+    public function getByEmail($email)
+    {
+        $stmt = $this->db->prepare("SELECT id, username, email, role, lat, lon FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        return $stmt->fetch();
+    }
+
+    public function updateProfile($id, $username, $email, $photoPath = null)
+    {
+        $sql = "UPDATE users SET username = ?, email = ?";
+        $params = [$username, $email];
+
+        if ($photoPath !== null) {
+            $sql .= ", profile_photo = ?";
+            $params[] = $photoPath;
+        }
+
+        $sql .= " WHERE id = ?";
+        $params[] = $id;
+
         try {
-            if ($photo) {
-                $stmt = $this->db->prepare("UPDATE users SET username = ?, email = ?, profile_photo = ? WHERE id = ?");
-                return $stmt->execute([$username, $email, $photo, $id]);
-            } else {
-                $stmt = $this->db->prepare("UPDATE users SET username = ?, email = ? WHERE id = ?");
-                return $stmt->execute([$username, $email, $id]);
-            }
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute($params);
         } catch (PDOException $e) {
             return false;
         }
@@ -60,42 +82,49 @@ class User
 
     public function update($id, $username, $email, $role, $password = null)
     {
+        $sql = "UPDATE users SET username = ?, email = ?, role = ?";
+        $params = [$username, $email, $role];
+
+        if ($password !== null) {
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $sql .= ", password_hash = ?";
+            $params[] = $hash;
+        }
+
+        $sql .= " WHERE id = ?";
+        $params[] = $id;
+
         try {
-            if ($password) {
-                $hash = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $this->db->prepare("UPDATE users SET username=?, email=?, role=?, password_hash=? WHERE id=?");
-                return $stmt->execute([$username, $email, $role, $hash, $id]);
-            } else {
-                $stmt = $this->db->prepare("UPDATE users SET username=?, email=?, role=? WHERE id=?");
-                return $stmt->execute([$username, $email, $role, $id]);
-            }
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute($params);
         } catch (PDOException $e) {
             return false;
         }
     }
 
-    public function getByEmail($email)
+    public function deleteUser($id)
     {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        return $stmt->fetch();
-    }
-
-    public function getById($id)
-    {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch();
+        try {
+            $stmt = $this->db->prepare("DELETE FROM users WHERE id = ?");
+            return $stmt->execute([$id]);
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 
     public function getAllUsers()
     {
-        return $this->db->query("SELECT * FROM users ORDER BY created_at DESC")->fetchAll();
+        return $this->db->query("SELECT id, username, email, role, created_at, profile_photo FROM users ORDER BY id ASC")->fetchAll();
     }
 
-    public function deleteUser($id)
+    public function updatePasswordByEmail($email, $newPassword)
     {
-        $stmt = $this->db->prepare("DELETE FROM users WHERE id = ?");
-        return $stmt->execute([$id]);
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        try {
+            $stmt = $this->db->prepare("UPDATE users SET password_hash = ? WHERE email = ?");
+            return $stmt->execute([$hash, $email]);
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 }

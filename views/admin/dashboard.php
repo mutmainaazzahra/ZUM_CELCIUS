@@ -27,7 +27,8 @@
             <i class="bi bi-check-circle-fill me-2"></i>
             <div>
                 <?php
-                if ($_GET['msg'] == 'created') echo "Member baru berhasil ditambahkan.";
+                if ($_GET['msg'] == 'created') echo "Member baru berhasil ditambahkan dan email notifikasi sudah dikirim.";
+                if ($_GET['msg'] == 'created_email_failed') echo "Member baru berhasil ditambahkan, namun GAGAL mengirim email notifikasi. Mohon berikan informasi akun (termasuk password awal) secara manual.";
                 if ($_GET['msg'] == 'updated') echo "Data member berhasil diperbarui.";
                 if ($_GET['msg'] == 'deleted') echo "Member berhasil dihapus.";
                 ?>
@@ -42,8 +43,9 @@
             <div>
                 <?php
                 if ($_GET['error'] == 'email_exists') echo "Gagal menambah user. Email sudah terdaftar dalam sistem!";
+                elseif ($_GET['error'] == 'username_space') echo "Gagal menambah/edit user. Username tidak boleh mengandung spasi.";
                 elseif ($_GET['error'] == 'invalid_input') echo "Gagal menambah user. Pastikan semua kolom terisi dan password minimal 6 karakter.";
-                elseif ($_GET['error'] == 'create_failed') echo "Gagal menambah user. Terjadi kesalahan pada database.";
+                elseif ($_GET['error'] == 'create_failed') echo "Gagal menambah user. Terjadi kesalahan pada database (data tidak tersimpan).";
                 elseif ($_GET['error'] == 'self_delete') echo "Anda tidak dapat menghapus akun Anda sendiri.";
                 else echo "Terjadi kesalahan saat memproses permintaan.";
                 ?>
@@ -110,7 +112,7 @@
                                                 Administrator
                                             </span>
                                         <?php else: ?>
-                                            <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3">
+                                            <span class="badge bg-info bg-opacity-25 text-info border border-info rounded-pill px-3">
                                                 Guest User
                                             </span>
                                         <?php endif; ?>
@@ -129,7 +131,7 @@
 
                                         <?php if ($u['role'] !== 'administrator' || $u['id'] != $_SESSION['user']['id']): ?>
                                             <?php if ($u['id'] != $_SESSION['user']['id']): ?>
-                                                <!-- Tombol Hapus -->
+
                                                 <a href="index.php?page=admin_dashboard&delete_user=<?php echo $u['id']; ?>"
                                                     class="btn btn-sm btn-light border shadow-sm rounded-circle text-danger"
                                                     title="Hapus User"
@@ -147,7 +149,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> 
 
 <!-- MODAL TAMBAH USER -->
 <div class="modal fade" id="addUserModal" tabindex="-1">
@@ -161,12 +163,12 @@
                 <div class="modal-body p-4">
                     <input type="hidden" name="action" value="create_user">
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">USERNAME</label>
+                        <label class="form-label small text-muted fw-bold">USERNAME (Tidak boleh spasi)</label>
                         <input type="text" name="username" class="form-control bg-light text-dark border" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small text-muted fw-bold">EMAIL</label>
-                        <input type="email" name="email" class="form-control bg-light text-dark border" required>
+                        <input type="email" name="email" class="form-control bg-light text-dark border" placeholder="user@contoh.co.id" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small text-muted fw-bold">ROLE</label>
@@ -176,8 +178,8 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">PASSWORD</label>
-                        <input type="password" name="password" class="form-control bg-light text-dark border" required>
+                        <label class="form-label small text-muted fw-bold">PASSWORD (Min 6 karakter)</label>
+                        <input type="password" name="password" class="form-control bg-light text-dark border" required minlength="6">
                     </div>
                 </div>
                 <div class="modal-footer border-top">
@@ -203,7 +205,7 @@
                     <input type="hidden" name="user_id" id="edit_user_id">
 
                     <div class="mb-3">
-                        <label class="form-label small text-muted fw-bold">USERNAME</label>
+                        <label class="form-label small text-muted fw-bold">USERNAME (Tidak boleh spasi)</label>
                         <input type="text" name="username" id="edit_username" class="form-control bg-light text-dark border" required>
                     </div>
                     <div class="mb-3">
