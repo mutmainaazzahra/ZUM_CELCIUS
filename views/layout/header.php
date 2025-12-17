@@ -249,8 +249,9 @@
             <div class="collapse navbar-collapse" id="navbarNav">
 
                 <div class="d-flex flex-grow-1 mx-lg-5 my-2 my-lg-0 position-relative">
-                    <button type="button" class="btn w-100 btn-search-trigger d-flex align-items-center p-1 ps-3 shadow-sm"
-                        data-bs-toggle="modal" data-bs-target="#mapModal">
+                    <button type="button"
+                        class="btn w-100 btn-search-trigger d-flex align-items-center p-1 ps-3 shadow-sm"
+                        id="navSearchTrigger">
                         <i class="bi bi-search me-3" style="color: var(--headline);"></i>
                         <span class="small flex-grow-1 fw-medium" style="opacity: 0.7;">Cari lokasi atau ganti kota...</span>
                         <div class="bg-warning rounded-circle p-2 d-flex align-items-center justify-content-center text-dark" style="width: 36px; height: 36px;">
@@ -403,6 +404,18 @@
             notifBtn.addEventListener('click', function() {
                 redDot.style.display = 'none';
                 fetch('index.php?page=mark_read').then(r => r.json());
+            });
+        }
+
+        const navSearch = document.getElementById('navSearchTrigger');
+        if (navSearch) {
+            navSearch.addEventListener('click', function() {
+                if (document.getElementById('mapboxMap')) {
+                    const mapModal = new bootstrap.Modal(document.getElementById('mapModal'));
+                    mapModal.show();
+                } else {
+                    window.location.href = 'index.php?page=home';
+                }
             });
         }
         });

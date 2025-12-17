@@ -665,7 +665,7 @@ if (isset($currentWeather['coord'])) {
                 if (manualState) manualState.style.display = 'block';
             }, {
                 enableHighAccuracy: true,
-                timeout: 20000,
+                timeout: 10000,
                 maximumAge: 0
             });
         } else if (loadingState) {

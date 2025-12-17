@@ -20,12 +20,23 @@ class AdminController
         // --- HANDLER POST REQUEST (Create & Update) ---
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            // 1. Tambah User Baru 
+            // 1. Tambah User Baru (Create User)
             if (isset($_POST['action']) && $_POST['action'] === 'create_user') {
                 $username = $_POST['username'];
                 $email = $_POST['email'];
                 $password = $_POST['password'];
                 $role = $_POST['role'];
+
+                if (empty($username) || empty($email) || strlen($password) < 6) {
+                    header("Location: index.php?page=admin_dashboard&error=invalid_input");
+                    exit;
+                }
+
+                if ($userModel->getByEmail($email)) {
+                    header("Location: index.php?page=admin_dashboard&error=email_exists");
+                    exit;
+                }
+
 
                 if ($userModel->create($username, $email, $password, $role)) {
                     header("Location: index.php?page=admin_dashboard&msg=created");
@@ -35,7 +46,7 @@ class AdminController
                 exit;
             }
 
-            // 2. Edit User 
+            // 2. Edit User (Role & Password DIHAPUS)
             if (isset($_POST['action']) && $_POST['action'] === 'edit_user') {
                 $id = $_POST['user_id'];
                 $username = $_POST['username'];

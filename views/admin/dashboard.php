@@ -1,6 +1,7 @@
 <?php include '../views/layout/header.php'; ?>
 
 <div class="container py-5">
+
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h2 class="fw-bold mb-0 text-dark"><i class="bi bi-shield-lock-fill text-warning me-2"></i> Dashboard Admin</h2>
@@ -38,7 +39,15 @@
     <?php if (isset($_GET['error'])): ?>
         <div class="alert alert-danger glass-card border-0 shadow-sm mb-4 d-flex align-items-center" style="background-color: #f8d7da !important; color: #842029;">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            Username atau Email Sudah Didaftarkan.
+            <div>
+                <?php
+                if ($_GET['error'] == 'email_exists') echo "Gagal menambah user. Email sudah terdaftar dalam sistem!";
+                elseif ($_GET['error'] == 'invalid_input') echo "Gagal menambah user. Pastikan semua kolom terisi dan password minimal 6 karakter.";
+                elseif ($_GET['error'] == 'create_failed') echo "Gagal menambah user. Terjadi kesalahan pada database.";
+                elseif ($_GET['error'] == 'self_delete') echo "Anda tidak dapat menghapus akun Anda sendiri.";
+                else echo "Terjadi kesalahan saat memproses permintaan.";
+                ?>
+            </div>
             <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
@@ -138,7 +147,7 @@
             </div>
         </div>
     </div>
-</div> 
+</div>
 
 <!-- MODAL TAMBAH USER -->
 <div class="modal fade" id="addUserModal" tabindex="-1">
@@ -162,7 +171,7 @@
                     <div class="mb-3">
                         <label class="form-label small text-muted fw-bold">ROLE</label>
                         <select name="role" class="form-select bg-light text-dark border">
-                            <option value="guest_user">Guest User</option>
+                            <option value="guest user">Guest User</option>
                             <option value="administrator">Administrator</option>
                         </select>
                     </div>
@@ -257,7 +266,6 @@
                 document.getElementById('edit_email').value = this.getAttribute('data-email');
             });
         });
-
     });
 </script>
 
