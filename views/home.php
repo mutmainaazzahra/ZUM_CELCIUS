@@ -191,6 +191,35 @@ if (isset($currentWeather['coord'])) {
 
 <div class="container pb-5">
     <?php if (isset($forecast['city']) && $forecast !== null): ?>
+        <div class="mt-4 mb-2">
+            <?php
+            $curr = $forecast['list'][0];
+            $temp = $curr['main']['temp'];
+            $hum = $curr['main']['humidity'];
+            $weatherMain = strtolower($curr['weather'][0]['main']);
+            $score = 100;
+            if ($temp > 32) $score -= 20;
+            if ($hum > 80) $score -= 15;
+            if (strpos($weatherMain, 'rain') !== false) $score -= 50;
+
+            $color = ($score > 70) ? 'success' : (($score > 40) ? 'warning' : 'danger');
+            $label = ($score > 70) ? 'SANGAT IDEAL' : (($score > 40) ? 'WASPADA' : 'BERISIKO');
+            ?>
+            <div class="glass-card p-3 border-start border-4 border-<?php echo $color; ?> d-flex align-items-center justify-content-between shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="bg-<?php echo $color; ?> bg-opacity-10 text-<?php echo $color; ?> rounded-circle fw-bold fs-4 d-flex align-items-center justify-content-center border border-<?php echo $color; ?>" style="width: 55px; height: 55px;">
+                        <?php echo $score; ?>
+                    </div>
+                    <div class="ms-3">
+                        <h6 class="mb-0 fw-bold">Skor Kenyamanan Aktivitas</h6>
+                        <small class="text-muted">Berdasarkan analisis cuaca real-time di <strong><?php echo $forecast['city']['name']; ?></strong></small>
+                    </div>
+                </div>
+                <div class="text-end d-none d-md-block">
+                    <span class="badge bg-<?php echo $color; ?> rounded-pill px-3 py-2 fw-bold" style="font-size: 0.7rem;"><i class="bi bi-cpu-fill me-1"></i> <?php echo $label; ?></span>
+                </div>
+            </div>
+        </div>
         <div class="bento-grid">
             <div class="col-span-8">
                 <div class="glass-card h-100 d-flex flex-column justify-content-between p-5 position-relative overflow-hidden">

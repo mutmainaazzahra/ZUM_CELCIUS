@@ -10,7 +10,7 @@ class Activity
 
     public function getByUser($userId)
     {
-        $stmt = $this->db->prepare("SELECT * FROM activities WHERE user_id = ? ORDER BY date DESC, time ASC");
+        $stmt = $this->db->prepare("SELECT * FROM activities WHERE user_id = ? ORDER BY date DESC, time DESC");
         $stmt->execute([$userId]);
         return $stmt->fetchAll();
     }

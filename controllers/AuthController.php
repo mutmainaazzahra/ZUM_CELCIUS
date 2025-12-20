@@ -2,7 +2,7 @@
 require_once '../models/User.php';
 require_once '../models/Notification.php';
 require_once '../services/MailService.php';
-require_once '../config/Env.php'; 
+require_once '../config/Env.php';
 
 class AuthController
 {
@@ -58,7 +58,6 @@ class AuthController
             }
 
             if ($userModel->register($username, $email, $password)) {
-
                 try {
                     $mailService = new MailService();
                     $subject = "Selamat Datang di Zum Celcius!";
@@ -86,6 +85,8 @@ class AuthController
     public function forgotPasswordProcess()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            date_default_timezone_set('Asia/Jakarta');
+
             $email = $_POST['email'] ?? null;
             $userModel = new User();
             $user = $userModel->getByEmail($email);
@@ -96,30 +97,28 @@ class AuthController
                 exit;
             }
 
-            $token = hash('sha256', time() . $user['email']);
+            $token = bin2hex(random_bytes(32));
+            $expiry = date("Y-m-d H:i:s", strtotime("+1 hour"));
+
+            $userModel->setResetToken($email, $token, $expiry);
 
             try {
                 $mailService = new MailService();
-                $subject = "Permintaan Reset Password";
+                $subject = "Permintaan Reset Password - Zum Celcius";
                 $appUrl = $_ENV['APP_URL'] ?? 'http://localhost/zum_celcius/public';
                 $resetLink = $appUrl . "?page=reset_password&token=" . $token;
 
                 $body = "
                     <h3>Halo " . htmlspecialchars($user['username']) . ",</h3>
-                    <p>Kami menerima permintaan untuk mengatur ulang password Anda. Jika ini bukan Anda, abaikan email ini.</p>
-                    <p>Untuk melanjutkan proses reset password, silakan klik tautan di bawah:</p>
+                    <p>Kami menerima permintaan untuk mengatur ulang password Anda.</p>
+                    <p>Silakan klik tautan di bawah (Berlaku 1 jam):</p>
                     <p><a href='" . $resetLink . "' style='display: inline-block; padding: 10px 20px; background-color: #ffd803; color: #272343; text-decoration: none; border-radius: 5px; font-weight: bold;'>ATUR ULANG PASSWORD</a></p>
-                    <p>Tautan ini akan kedaluwarsa dalam 1 jam.</p>
-                    <p>Terima kasih.</p>
+                    <p>Jika ini bukan Anda, abaikan email ini.</p>
                 ";
                 $mailService->send($user['email'], $user['username'], $subject, $body);
-
                 $_SESSION['success'] = "Link reset password telah dikirim ke email Anda.";
-
-                $_SESSION['reset_token'] = $token;
-                $_SESSION['reset_email'] = $user['email'];
             } catch (Exception $e) {
-                $_SESSION['error'] = "Gagal mengirim email reset password. Cek pengaturan SMTP Anda.";
+                $_SESSION['error'] = "Gagal mengirim email reset password.";
             }
 
             header("Location: index.php?page=forgot_password");
@@ -130,35 +129,30 @@ class AuthController
     public function resetPasswordLogic()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            date_default_timezone_set('Asia/Jakarta');
+
             $token = $_POST['token'] ?? null;
             $password = $_POST['password'] ?? null;
             $confirmPassword = $_POST['confirm_password'] ?? null;
 
-            // 1. Cek Validasi Input
             if ($password !== $confirmPassword || strlen($password) < 6) {
                 $_SESSION['error'] = "Password tidak cocok atau kurang dari 6 karakter.";
                 header("Location: index.php?page=reset_password&token=" . $token);
                 exit;
             }
 
-            // 2. Cek Validitas Token
-            if ($token !== ($_SESSION['reset_token'] ?? null)) {
+            $userModel = new User();
+            $user = $userModel->getUserByToken($token);
+
+            if (!$user) {
                 header("Location: index.php?page=reset_password&status=invalid_token");
                 exit;
             }
 
-            // 3. Update Password
-            $userModel = new User();
-            $emailToUpdate = $_SESSION['reset_email'];
-            $updateSuccess = $userModel->updatePasswordByEmail($emailToUpdate, $password);
-
-            unset($_SESSION['reset_token']);
-            unset($_SESSION['reset_email']);
-
-            if ($updateSuccess) {
-                header("Location: index.php?page=login&status=reset_success.");
+            if ($userModel->updatePasswordAndClearToken($user['id'], $password)) {
+                header("Location: index.php?page=login&status=reset_success");
             } else {
-                $_SESSION['error'] = "Gagal memperbarui password di database.";
+                $_SESSION['error'] = "Gagal memperbarui password.";
                 header("Location: index.php?page=reset_password&token=" . $token);
             }
             exit;

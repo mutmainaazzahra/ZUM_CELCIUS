@@ -114,7 +114,35 @@ class User
 
     public function getAllUsers()
     {
-        return $this->db->query("SELECT id, username, email, role, created_at, profile_photo FROM users ORDER BY id ASC")->fetchAll();
+        return $this->db->query("SELECT id, username, email, role, created_at, profile_photo FROM users ORDER BY id DESC")->fetchAll();
+    }
+
+    public function setResetToken($email, $token, $expiry)
+    {
+        $stmt = $this->db->prepare("UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?");
+        return $stmt->execute([$token, $expiry, $email]);
+    }
+
+    public function getUserByToken($token)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE reset_token = ?");
+        $stmt->execute([$token]);
+        $user = $stmt->fetch();
+
+        if ($user) {
+            $expiryTime = strtotime($user['reset_token_expiry']);
+            if ($expiryTime > time()) {
+                return $user;
+            }
+        }
+        return false;
+    }
+
+    public function updatePasswordAndClearToken($userId, $newPassword)
+    {
+        $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $this->db->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?");
+        return $stmt->execute([$hash, $userId]);
     }
 
     public function updatePasswordByEmail($email, $newPassword)

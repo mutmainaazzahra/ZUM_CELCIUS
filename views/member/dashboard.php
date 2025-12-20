@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
             <h2 class="fw-bold mb-0" style="color: var(--headline);"><i class="bi bi-list-check me-2 text-warning"></i> Dashboard Member</h2>
-            <p class="text-muted">Kelola jadwal dan kegiatan harianmu.</p>
+            <p class="text-muted">Kelola jadwal dan pantau prediksi cuaca untuk setiap kegiatan.</p>
         </div>
 
         <?php if (isset($forecast['list'][0])): ?>
@@ -12,7 +12,7 @@
                 <img src="https://openweathermap.org/img/wn/<?php echo $forecast['list'][0]['weather'][0]['icon']; ?>.png" width="40">
                 <div class="ms-2 lh-1">
                     <div class="fw-bold" style="color: var(--headline);"><?php echo round($forecast['list'][0]['main']['temp']); ?>°C</div>
-                    <small class="text-muted" style="font-size: 0.8rem;"><?php echo $forecast['city']['name']; ?></small>
+                    <small class="text-muted" style="font-size: 0.8rem;"><?php echo $forecast['city']['name'] ?? 'Lokasi Anda'; ?></small>
                 </div>
             </div>
         <?php endif; ?>
@@ -35,7 +35,7 @@
 
     <div class="row g-4">
         <div class="col-lg-4">
-            <div class="glass-card h-100">
+            <div class="glass-card h-100 shadow-sm">
                 <div class="p-4 border-bottom" style="border-color: var(--tertiary) !important;">
                     <h5 class="fw-bold m-0" style="color: var(--headline);"><i class="bi bi-plus-circle-fill me-2 text-warning"></i>Tambah Baru</h5>
                 </div>
@@ -78,9 +78,9 @@
         </div>
 
         <div class="col-lg-8">
-            <div class="glass-card h-100 p-0 overflow-hidden">
-                <div class="p-4 border-bottom" style="border-color: var(--tertiary) !important; background-color: var(--secondary);">
-                    <h5 class="fw-bold m-0" style="color: var(--headline);"><i class="bi bi-calendar-check me-2"></i>Riwayat Aktivitas</h5>
+            <div class="glass-card h-100 p-0 overflow-hidden shadow-sm">
+                <div class="p-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--tertiary) !important; background-color: var(--secondary);">
+                    <h5 class="fw-bold m-0" style="color: var(--headline);"><i class="bi bi-calendar-check me-2"></i>Aktivitas & Prediksi Cuaca</h5>
                 </div>
 
                 <div class="table-responsive">
@@ -89,14 +89,15 @@
                             <tr>
                                 <th class="ps-4 py-3 text-muted small fw-bold text-uppercase">Waktu</th>
                                 <th class="text-muted small fw-bold text-uppercase">Kegiatan</th>
-                                <th class="text-muted small fw-bold text-uppercase">Status</th>
+                                <th class="text-muted small fw-bold text-uppercase">Prediksi Cuaca</th>
+                                <th class="text-muted small fw-bold text-uppercase">Kategori</th>
                                 <th class="text-end pe-4 text-muted small fw-bold text-uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($activities)): ?>
                                 <tr>
-                                    <td colspan="4" class="text-center py-5 text-muted">Belum ada aktivitas. Ayo mulai produktif!</td>
+                                    <td colspan="5" class="text-center py-5 text-muted">Belum ada aktivitas. Ayo mulai produktif!</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($activities as $act): ?>
@@ -109,9 +110,43 @@
                                         </td>
                                         <td>
                                             <div class="fw-bold" style="color: var(--paragraph);"><?php echo htmlspecialchars($act['name']); ?></div>
-                                            <small class="text-muted d-block text-truncate" style="max-width: 200px;">
+                                            <small class="text-muted d-block text-truncate" style="max-width: 150px;">
                                                 <?php echo htmlspecialchars($act['notes']); ?>
                                             </small>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $actTime = strtotime($act['date'] . ' ' . $act['time']);
+                                            $matchedForecast = null;
+
+                                            if (isset($forecast['list'])) {
+                                                foreach ($forecast['list'] as $f) {
+                                                    if (abs($f['dt'] - $actTime) < 7200) {
+                                                        $matchedForecast = $f;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            ?>
+                                            <?php if ($matchedForecast): ?>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="https://openweathermap.org/img/wn/<?php echo $matchedForecast['weather'][0]['icon']; ?>.png" width="35" title="<?php echo $matchedForecast['weather'][0]['description']; ?>">
+                                                    <div class="ms-1 lh-sm">
+                                                        <?php
+                                                        $weatherMain = strtolower($matchedForecast['weather'][0]['main']);
+                                                        $isRainy = (strpos($weatherMain, 'rain') !== false || strpos($weatherMain, 'storm') !== false);
+
+                                                        if ($act['type'] == 'Outdoor' && $isRainy) {
+                                                            echo '<span class="text-danger fw-bold" style="font-size: 0.75rem;"><i class="bi bi-exclamation-triangle-fill"></i> Potensi Hujan</span>';
+                                                        } else {
+                                                            echo '<span class="text-success fw-medium" style="font-size: 0.75rem;">Aman (' . round($matchedForecast['main']['temp']) . '°C)</span>';
+                                                        }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="text-muted small italic" style="font-size: 0.7rem;">Data Lampau/Belum Tersedia</span>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <?php if ($act['type'] == 'Outdoor'): ?>
@@ -141,6 +176,9 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="p-3 bg-light border-top small text-muted">
+                    <strong>💡 Intelligence System:</strong> Kolom prediksi di atas menggunakan algoritma <em>Time-Series Matching</em> yang menghubungkan jadwal Anda dengan data <em>3-hourly forecast</em> dari OpenWeatherMap API secara real-time.
+                </div>
             </div>
         </div>
     </div>
@@ -149,7 +187,7 @@
 <!-- Modal Edit -->
 <div class="modal fade" id="editActivityModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0">
+        <div class="modal-content border-0 shadow-lg">
             <div class="modal-header border-bottom">
                 <h5 class="modal-title fw-bold" style="color: var(--headline);">Edit Aktivitas</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -159,11 +197,11 @@
                     <input type="hidden" name="edit_activity" value="1">
                     <input type="hidden" name="id" id="edit_id">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">NAMA</label>
+                        <label class="form-label small fw-bold text-muted">NAMA KEGIATAN</label>
                         <input type="text" name="name" id="edit_name" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">TIPE</label>
+                        <label class="form-label small fw-bold text-muted">KATEGORI</label>
                         <select name="type" id="edit_type" class="form-select">
                             <option value="Outdoor">Outdoor</option>
                             <option value="Indoor">Indoor</option>
