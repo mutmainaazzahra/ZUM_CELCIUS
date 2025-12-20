@@ -60,7 +60,7 @@ foreach ($activities as $act) {
         $payload = [
             'title' => "⏰ Pengingat: " . $act['name'],
             'body' => "Halo " . $act['username'] . ", aktivitas Anda dimulai sekitar 5 menit lagi (" . substr($act['time'], 0, 5) . ")! Siapkan diri Anda.",
-            'icon' => 'assets/logo.png', 
+            'icon' => 'assets/logo.png',
             'data' => ['url' => $_ENV['APP_URL'] . '/index.php?page=dashboard']
         ];
 
@@ -79,45 +79,54 @@ foreach ($activities as $act) {
 }
 
 
-if (date('i') == '00' || isset($_GET['force_weather'])) {
-    echo "\n--- [2] Cek Peringatan Cuaca ---\n";
+echo "\n--- [2] Cek Peringatan Cuaca ---\n";
 
-    $stmt = $db->query("SELECT id, username, lat, lon, last_location_name FROM users WHERE lat IS NOT NULL");
-    $users = $stmt->fetchAll();
+$stmt = $db->query("SELECT id, username, lat, lon, last_location_name FROM users WHERE lat IS NOT NULL");
+$users = $stmt->fetchAll();
 
-    foreach ($users as $user) {
-        $weatherData = $weatherClient->getForecast($user['lat'], $user['lon']);
+foreach ($users as $user) {
+    $checkNotif = $db->prepare("SELECT id FROM notifications 
+                                WHERE user_id = ? 
+                                AND message LIKE 'Web Push: Peringatan cuaca%' 
+                                AND created_at > DATE_SUB(NOW(), INTERVAL 30 MINUTE)");
+    $checkNotif->execute([$user['id']]);
+    $alreadyNotified = $checkNotif->fetch();
 
-        if (!isset($weatherData['list'][0])) continue;
-
-        $current = $weatherData['list'][0];
-        $temp = $current['main']['temp'];
-        $condition = strtolower($current['weather'][0]['main']);
-        $desc = $current['weather'][0]['description'];
-        $cityName = $user['last_location_name'] ?? "Lokasi Anda";
-
-        $shouldNotify = false;
-        $alertMsg = "";
-
-        // Logika Peringatan Cuaca
-        if (strpos($condition, 'rain') !== false) {
-            $shouldNotify = true;
-            $alertMsg = "☔ Hujan turun di $cityName ($desc). Bawa payung!";
-        } elseif (strpos($condition, 'thunderstorm') !== false) {
-            $shouldNotify = true;
-            $alertMsg = "⚡ Badai petir di $cityName! Hati-hati.";
-        } elseif ($temp >= 33) {
-            $shouldNotify = true;
-            $alertMsg = "☀️ Panas terik ($temp°C) di $cityName. Gunakan tabir surya.";
-        }
-
-        if ($shouldNotify) {
-            echo "Mengirim notif cuaca ke " . $user['username'] . "...\n";
-            $pushService->sendWeatherAlert($user['id'], $cityName, ucfirst($desc), $temp);
-        }
+    if ($alreadyNotified && !isset($_GET['force_weather'])) {
+        echo "Skip " . $user['username'] . " (Sudah dikirim dalam 30 menit terakhir).\n";
+        continue;
     }
-} else {
-    echo "\n--- [2] Cek Cuaca Dilewati (Menunggu jam tepat) ---\n";
+
+    $weatherData = $weatherClient->getForecast($user['lat'], $user['lon']);
+
+    if (!isset($weatherData['list'][0])) {
+        echo "Gagal ambil data cuaca untuk " . $user['username'] . ".\n";
+        continue;
+    }
+
+    $current = $weatherData['list'][0];
+    $temp = $current['main']['temp'];
+    $condition = strtolower($current['weather'][0]['main']);
+    $desc = $current['weather'][0]['description'];
+    $cityName = $user['last_location_name'] ?? "Lokasi Anda";
+
+    $shouldNotify = false;
+
+    // Logika Peringatan Cuaca (Hanya jika kondisi ekstrem)
+    if (strpos($condition, 'rain') !== false) {
+        $shouldNotify = true;
+    } elseif (strpos($condition, 'thunderstorm') !== false) {
+        $shouldNotify = true;
+    } elseif ($temp >= 33) {
+        $shouldNotify = true;
+    }
+
+    if ($shouldNotify) {
+        echo "Mengirim notif cuaca ke " . $user['username'] . "...\n";
+        $pushService->sendWeatherAlert($user['id'], $cityName, ucfirst($desc), $temp);
+    } else {
+        echo "Cuaca aman untuk " . $user['username'] . " (" . ucfirst($desc) . ").\n";
+    }
 }
 
 echo "\nSelesai.</pre>";
