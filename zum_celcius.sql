@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 14, 2025 at 10:44 PM
+-- Generation Time: Dec 21, 2025 at 01:48 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -44,7 +44,7 @@ CREATE TABLE `activities` (
 --
 
 INSERT INTO `activities` (`id`, `user_id`, `name`, `type`, `notes`, `date`, `created_at`, `time`, `reminder_sent`) VALUES
-(4, 8, 'nugas', 'Indoor', '', '2025-12-12', '2025-12-12 13:39:15', '21:00:00', 1);
+(12, 8, 'malming', 'Indoor', '', '2025-12-20', '2025-12-20 13:33:19', '20:52:00', 0);
 
 -- --------------------------------------------------------
 
@@ -81,7 +81,10 @@ INSERT INTO `notifications` (`id`, `user_id`, `message`, `status`, `created_at`,
 (16, 1, 'Broadcast: Peringatan Admin (Broadcast)', 'sent', '2025-12-09 13:48:57', 1),
 (18, 1, 'Web Push: Peringatan cuaca dikirim ke 1 perangkat.', 'sent', '2025-12-09 13:49:06', 1),
 (19, 1, 'Web Push: Peringatan cuaca dikirim ke 1 perangkat.', 'sent', '2025-12-09 13:58:54', 1),
-(22, 8, '⏰ Pengingat: nugas akan dimulai pukul 21:00', 'sent', '2025-12-12 13:56:17', 1);
+(22, 8, '⏰ Pengingat: nugas akan dimulai pukul 21:00', 'sent', '2025-12-12 13:56:17', 1),
+(37, 8, '⏰ Pengingat: dinner akan dimulai pukul 17:47', 'sent', '2025-12-19 10:42:13', 1),
+(38, 8, '⏰ Pengingat: malming akan dimulai pukul 20:20', 'sent', '2025-12-20 13:15:34', 1),
+(40, 33, '⏰ Pengingat: malming akan dimulai pukul 22:00', 'sent', '2025-12-20 14:56:30', 1);
 
 -- --------------------------------------------------------
 
@@ -111,7 +114,8 @@ INSERT INTO `push_subscriptions` (`id`, `user_id`, `endpoint`, `p256dh`, `auth`,
 (8, 1, 'https://fcm.googleapis.com/fcm/send/djJnBTcLevg:APA91bE8inS5xN395anpkGnNJC8Co6BTrf0unmRs2JRQfNoxTvrx9r5_KN7Awsm3MPd7agEK6AswhSMI5JqtDrA7sHW4Xy2ITC9Rg0RddNY4e0AsOiMhNQ2vfybG4LM5R6Vdoi_FXepr', 'BKpvaRykPF8J-nrAMs3RrPHwshuVyPQzyKhpIy-y1YIbD_z_LmoeUVQlAeS5MakepHjh7WaEXkNoJkkhSUbtWxw', '3Woc--crZAkvo2XG2pqrug', '2025-12-05 08:49:53'),
 (9, 1, 'https://fcm.googleapis.com/fcm/send/cn_TKYQyzJI:APA91bFECa1srpKiU_4oLTGsMUuwi9WXnqrCJr6M2Rcf393LrUadDS_WOMFNPZ7yaD2Dik3b3qmA0i_RXZjs3gaTWRFhBtbrfccx9HF67dXysqrCptYZuHHnfmrgsQmRPHnO8Y93PKVl', 'BHESLWlGHx1yb9RB787ma2c5tE3FXNyEBTlkP0RaurWPnczViV63FlRxxuEvohs5MiL3om-Vn5Bo1UOjBPdeLZI', 'mhiXiBpSXrSXL31fsKuRiQ', '2025-12-06 11:28:38'),
 (10, 8, 'https://fcm.googleapis.com/fcm/send/cy1udbfzgZI:APA91bH_aGXPjZZY9NoInsZTlaKWuf3jb31VectbUBdzlwchROom_azRwpFBpFR8XVPqq3nPS3j9kIhlrB_9PMF6lF4Yw4f2N8S6yY0PzRHiMwdmg2XGK1H091DKIi8iUvhQZ5Y69P8H', 'BKfaYPeyP4odBRBXaygDzv79VHlyl9l7VIW222jC0T1HLo3I54h0A7FAlZaUAAHQxTvCK2-iCT98QyXCeja5DU4', 'IiwQUqMt6lqvDA3eaeksMQ', '2025-12-10 10:04:38'),
-(11, 1, 'https://fcm.googleapis.com/fcm/send/dmyUoclZaW0:APA91bHAw_Hnj7jXkL_TmdW2l7IvDoCcZtDr2DzF5lKMlmwcWPL1Z-ciLAlinWbOOg9IapdVwqY-ftgsOnOIN97WvhMw7gmviIDZY7HU33i6csRYc2eeRZh1Ou9pJ_mXFdk0c5V6uYTM', 'BJF0VRyTahX7NIFgRJCMaCSkI_aavqe1Kk_Wc2mhVS23GiH9B_JsbxAzEk9Zfg1w2gNOwbFSXsYsMoqeg9aSjA4', 'klSkj46McJhXlxriUHkJmA', '2025-12-12 13:39:30');
+(11, 8, 'https://fcm.googleapis.com/fcm/send/dmyUoclZaW0:APA91bHAw_Hnj7jXkL_TmdW2l7IvDoCcZtDr2DzF5lKMlmwcWPL1Z-ciLAlinWbOOg9IapdVwqY-ftgsOnOIN97WvhMw7gmviIDZY7HU33i6csRYc2eeRZh1Ou9pJ_mXFdk0c5V6uYTM', 'BJF0VRyTahX7NIFgRJCMaCSkI_aavqe1Kk_Wc2mhVS23GiH9B_JsbxAzEk9Zfg1w2gNOwbFSXsYsMoqeg9aSjA4', 'klSkj46McJhXlxriUHkJmA', '2025-12-12 13:39:30'),
+(12, 33, 'https://fcm.googleapis.com/fcm/send/csjLlgEstCI:APA91bHXPI5vDPNolOZ3RXQsMgP1fx-5dHOOPJGBuMBwsxTTuMlqiAAsXUOyheSUdzTJ1GKzFzI98FurEiCjh_MqMWSvmds5sHJ-zNOGyNR8dxVNnUyRpAOvtOffUaCQDf3XMTbIulNX', 'BPdIuhzepMgvz_h1sU_wMk_tPtdoKt4aWyIIcugFhit1wkvoNdHO08FCqW-Z7oQTeuVId2jr0evniGsrpldKXyg', 'Rz9xc4F4Rf_DrKoZejlZjg', '2025-12-20 13:09:57');
 
 -- --------------------------------------------------------
 
@@ -129,16 +133,19 @@ CREATE TABLE `users` (
   `profile_photo` varchar(255) DEFAULT NULL,
   `lat` decimal(10,8) DEFAULT NULL,
   `lon` decimal(11,8) DEFAULT NULL,
-  `last_location_name` varchar(100) DEFAULT NULL
+  `last_location_name` varchar(100) DEFAULT NULL,
+  `reset_token` varchar(255) DEFAULT NULL,
+  `reset_token_expiry` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `role`, `created_at`, `profile_photo`, `lat`, `lon`, `last_location_name`) VALUES
-(1, 'admin', 'admin@zumcelcius.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'administrator', '2025-12-03 08:54:06', '1764765117_pink-lilies-bouquet-elegant-flowers-spring-blossom.png', '-6.37009920', '107.40039680', 'Cengkong, 41377, Purwasari, Kota Karawang, Jawa Barat, Indonesia'),
-(8, 'guest', 'zumcelcius@gmail.com', '$2y$10$ionEOzpYOQ5jLton1JbhMOMRJ2lXZr51IZ3CBFCm1JmDtfoPbecpK', 'guest user', '2025-12-12 13:37:47', NULL, '-6.37009920', '107.40039680', 'Cengkong, 41377, Purwasari, Kota Karawang, Jawa Barat, Indonesia');
+INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `role`, `created_at`, `profile_photo`, `lat`, `lon`, `last_location_name`, `reset_token`, `reset_token_expiry`) VALUES
+(1, 'admin', 'admin@zumcelcius.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'administrator', '2025-12-03 08:54:06', '1766239659_blue-sky-background-with-fluffy-white-clouds.jpg', '-6.32395355', '107.30102933', 'Puseurjaya, 41360, Telukjambe Timur, Kota Karawang, Jawa Barat, Indonesia', NULL, NULL),
+(8, 'guest', 'zumcelcius@gmail.com', '$2y$10$9QwH44E90efMMJAaFmUYBOQyZ79fUj4eSLyTZnboE5GZwPCeDBB1G', 'guest user', '2025-12-12 13:37:47', '1766237638_sun-moon-flat.png', '-6.37009920', '107.40039680', 'Cengkong, 41377, Purwasari, Kota Karawang, Jawa Barat, Indonesia', NULL, NULL),
+(33, 'test', 'mainamut28@gmail.com', '$2y$10$3bmomb7kwZxCFYVYPR4yB.hSE52QSNuJFcagGPNbY.c4hEYYvVqL6', 'guest user', '2025-12-20 14:08:12', '1766243776_Mutmaina Az\'zahra.jpeg', '36.53623600', '128.16894400', 'Korea Selatan', NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -181,25 +188,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activities`
 --
 ALTER TABLE `activities`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `push_subscriptions`
 --
 ALTER TABLE `push_subscriptions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- Constraints for dumped tables
