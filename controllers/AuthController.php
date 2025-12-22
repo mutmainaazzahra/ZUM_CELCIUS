@@ -86,7 +86,6 @@ class AuthController
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             date_default_timezone_set('Asia/Jakarta');
-
             $email = $_POST['email'] ?? null;
             $userModel = new User();
             $user = $userModel->getByEmail($email);
@@ -99,7 +98,6 @@ class AuthController
 
             $token = bin2hex(random_bytes(32));
             $expiry = date("Y-m-d H:i:s", strtotime("+1 hour"));
-
             $userModel->setResetToken($email, $token, $expiry);
 
             try {
@@ -108,13 +106,7 @@ class AuthController
                 $appUrl = $_ENV['APP_URL'] ?? 'http://localhost/zum_celcius/public';
                 $resetLink = $appUrl . "?page=reset_password&token=" . $token;
 
-                $body = "
-                    <h3>Halo " . htmlspecialchars($user['username']) . ",</h3>
-                    <p>Kami menerima permintaan untuk mengatur ulang password Anda.</p>
-                    <p>Silakan klik tautan di bawah (Berlaku 1 jam):</p>
-                    <p><a href='" . $resetLink . "' style='display: inline-block; padding: 10px 20px; background-color: #ffd803; color: #272343; text-decoration: none; border-radius: 5px; font-weight: bold;'>ATUR ULANG PASSWORD</a></p>
-                    <p>Jika ini bukan Anda, abaikan email ini.</p>
-                ";
+                $body = "<h3>Halo " . htmlspecialchars($user['username']) . ",</h3><p>Silakan klik link berikut untuk reset password: <a href='$resetLink'>$resetLink</a></p>";
                 $mailService->send($user['email'], $user['username'], $subject, $body);
                 $_SESSION['success'] = "Link reset password telah dikirim ke email Anda.";
             } catch (Exception $e) {
@@ -130,7 +122,6 @@ class AuthController
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             date_default_timezone_set('Asia/Jakarta');
-
             $token = $_POST['token'] ?? null;
             $password = $_POST['password'] ?? null;
             $confirmPassword = $_POST['confirm_password'] ?? null;
@@ -171,6 +162,7 @@ class AuthController
             $id = $_SESSION['user']['id'];
             $username = trim($_POST['username']);
             $email = $_POST['email'];
+            $oldPhoto = $_SESSION['user']['profile_photo'] ?? null;
             $photoPath = null;
 
             if (strpos($username, ' ') !== false) {
@@ -179,11 +171,47 @@ class AuthController
             }
 
             if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
+                $tmpFile = $_FILES['photo']['tmp_name'];
+                $fileName = $_FILES['photo']['name'];
+                $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+                if (!in_array($fileExtension, $allowedExtensions)) {
+                    header("Location: index.php?page=profile&error=invalid_file_type");
+                    exit;
+                }
+
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mimeType = finfo_file($finfo, $tmpFile);
+                finfo_close($finfo);
+
+                $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!in_array($mimeType, $allowedMimeTypes)) {
+                    header("Location: index.php?page=profile&error=malicious_file_detected");
+                    exit;
+                }
+
+                if ($_FILES['photo']['size'] > 2 * 1024 * 1024) {
+                    header("Location: index.php?page=profile&error=file_too_large");
+                    exit;
+                }
+
+                if (getimagesize($tmpFile) === false) {
+                    header("Location: index.php?page=profile&error=corrupted_image");
+                    exit;
+                }
+
                 $targetDir = "../public/uploads/";
-                if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-                $fileName = time() . '_' . basename($_FILES["photo"]["name"]);
-                if (move_uploaded_file($_FILES["photo"]["tmp_name"], $targetDir . $fileName)) {
-                    $photoPath = $fileName;
+                if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
+
+                $newFileName = bin2hex(random_bytes(16)) . '.' . $fileExtension;
+
+                if (move_uploaded_file($tmpFile, $targetDir . $newFileName)) {
+                    $photoPath = $newFileName;
+
+                    if ($oldPhoto && file_exists($targetDir . $oldPhoto)) {
+                        unlink($targetDir . $oldPhoto);
+                    }
                 }
             }
 
